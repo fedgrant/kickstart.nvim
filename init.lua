@@ -110,6 +110,25 @@ vim.o.mouse = 'a'
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
 
+-- Fold support. Uses the treesitter textDocument/foldingRange
+-- • `za` — toggle fold
+-- • `zc` — close fold
+-- • `zo` — open fold
+-- • `zM` — close all folds
+-- • `zR` — open all folds
+vim.o.foldmethod = 'expr'
+vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+vim.o.foldlevel = 99 -- start with all folds open
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = '*.vcl',
+  callback = function()
+    vim.opt_local.foldmethod = 'marker'
+    vim.opt_local.foldmarker = '{,}'
+    vim.opt_local.foldlevel = 99
+  end,
+})
+
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
@@ -285,6 +304,12 @@ require('lazy').setup({
       },
     },
   },
+  {
+    'tpope/vim-fugitive',
+  },
+  {
+    'tpope/vim-rhubarb',
+  },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -406,25 +431,7 @@ require('lazy').setup({
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
-        --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        pickers = {
-          find_files = {
-            theme = 'ivy',
-          },
-          live_grep = {
-            theme = 'ivy',
-          },
-          git_files = {
-            theme = 'ivy',
-          },
-        },
+        defaults = require('telescope.themes').get_ivy(),
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_ivy(),
@@ -448,7 +455,12 @@ require('lazy').setup({
       end, { desc = '[S]earch [E]verything' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', function()
+        builtin.live_grep { additional_args = { '--hidden' } }
+      end, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sG', function()
+        builtin.live_grep { additional_args = { '--no-ignore' } }
+      end, { desc = '[S]earch by [G]rep (no ignore)' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
