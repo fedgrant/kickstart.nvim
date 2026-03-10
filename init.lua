@@ -456,10 +456,10 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', function()
-        builtin.live_grep { additional_args = { '--hidden' } }
+        builtin.live_grep { additional_args = { '--hidden', '--glob=!.git/' } }
       end, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sG', function()
-        builtin.live_grep { additional_args = { '--no-ignore' } }
+        builtin.live_grep { additional_args = { '--no-ignore', '--glob=!.git/' } }
       end, { desc = '[S]earch by [G]rep (no ignore)' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
